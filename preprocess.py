@@ -7,45 +7,80 @@ import numpy
 from sklearn import cross_validation
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_selection import SelectPercentile, f_classif
+import user_features, movie_genre
+User_features = {} 
+Movie_genre = {}
+features_combined = []
+ratings_combined = []
 
-movie_genres = ["unknown","Action","Adventure","Animation","Children","Comedy","Crime","Documentary","Drama","Fantasy","Film-Noir","Horror","Musical","Mystery","Romance","Sci-Fi","Thriller","War","Western"]
+features_combined_train = []
+ratings_combined_train = []
 
 def load_data(path = "ml-100k"):
-    
-    movies_gen = {}
-    movies={}
-    genres= {}
-    #m_id = {}
-    
-    for line in open(path+'/u.item'):
-        (m_id)=map(int, line.split('|')[0:1])
-        (genres) = map(int, line.split('|')[5:24])
-        print genres
-        print m_id[0]
-        movies_gen[m_id[0]] = []
-        for i in range(19):
-            if genres[i]==1:
-                #if len(movies_gen) == 0:
-                    #movies_gen[m_id[0]] = []
-                    #movies_gen[0].append(movie_genres[i])
-                movies_gen[m_id[0]].append(movie_genres[i]) 
-                
-                
-        print movies_gen
-        #movies[m_id]=title
+    User_features = user_features.load_data()
+    Movie_genre = movie_genre.load_data()
+    '''
+    i = 1
+    while 1:
+        print User_features[i]
+        print "\n"
+        print Movie_genre[i]
+        print "\n"
+        i = i+1
+        y = raw_input()
+    '''
 
+    counter = 0
     prefs={}
-    for line in open(path+'/u.data'):
-        (user,movieid,rating,ts)=line.split('\t')
-        prefs.setdefault(user,{})
-        prefs[user][movies[movieid]]=float(rating)
-    
+    for line in open(path+'/u1.base'):
+        (user) = map(int, line.split('\t')[0:1])
+        (movieid) = map(int, line.split('\t')[1:2])
+        (rating) = map(int, line.split('\t')[2:3])
+        prefs.setdefault(user[0],{})
+        prefs[user[0]][movieid[0]] = float(rating[0])
+        features_combined.append([])
+        a = numpy.array(User_features[user[0]])
+        b = numpy.array(Movie_genre[movieid[0]])
+        a.resize(b.shape)
+        features_combined[counter] = a + b
+        ratings_combined.append(rating[0])
+        counter+=1
+
+
+
+        '''
+        print features_combined
+        print ratings_combined
+        x = raw_input()
+        '''
+        
+    '''
     for line in open(path+'/u.user'): 
         features = {}
         (u_id,age, gender, occupation)=line.split('|')[0:4]
         features[u_id] = [age, gender, occupation]
+    '''
 
-    return prefs
+    counter_train = 0
+    prefs={}
+    for line in open(path+'/u1.test'):
+        (user1) = map(int, line.split('\t')[0:1])
+        (movieid1) = map(int, line.split('\t')[1:2])
+        (rating1) = map(int, line.split('\t')[2:3])
+        prefs.setdefault(user1[0],{})
+        prefs[user1[0]][movieid1[0]] = float(rating1[0])
+        features_combined_train.append([])
+        a = numpy.array(User_features[user1[0]])
+        b = numpy.array(Movie_genre[movieid1[0]])
+        a.resize(b.shape)
+        features_combined_train[counter_train] = a + b
+        ratings_combined_train.append(rating1[0])
+        counter_train+=1
+
+
+
+    return numpy.array(features_combined), ratings_combined, numpy.array(features_combined_train), ratings_combined_train
+    
 
 
 
@@ -103,3 +138,7 @@ def preprocess(words_file = "../tools/word_data.pkl", authors_file="../tools/ema
     print "no. of Sara training emails:", len(labels_train)-sum(labels_train)
     
     return features_train_transformed, features_test_transformed, labels_train, labels_test
+
+
+if __name__ == "__main__":
+    load_data()
