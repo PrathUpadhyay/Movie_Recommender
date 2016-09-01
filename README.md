@@ -10,7 +10,11 @@ Accuracy score:  0.302
 
 
 SVM
+training time: 1464.42 s
+prediction time: 101.125 s
+Accuracy Score:  0.3537
 
 Decision Tree
+best accuracy = 35%, for split= 50
 
 Regression
